@@ -3,7 +3,7 @@ import { ItemPreviewSmall } from '@/components/ItemPreviewSmall';
 import { Colors } from '@/constants/Colors';
 import { Entypo } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Platform, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, Platform, View, Text, TextInput, TouchableOpacity, Dimensions } from 'react-native';
 
 import LebronifyHeader from '@/components/LebronifyHeader';
 import LebronifyPlayer from '@/components/LebronifyPlayer';
@@ -31,7 +31,7 @@ export default function HomeScreen() {
       style={[styles.root]}
     >
 
-      <LebronifyHeader />
+      <LebronifyHeader songlist={songlist} />
 
 
       <View style={[styles.content]}>
@@ -43,9 +43,9 @@ export default function HomeScreen() {
           <TouchableOpacity onPress={() => setActiveView(1)} style={{ backgroundColor: activeView === 1 ? Colors.light.secondary : Colors.light.text, padding: 8, borderRadius: 8 }}>
             <Text style={{ color: activeView === 1 ? Colors.light.text : Colors.light.secondary }}>Songs</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveView(2)} style={{ backgroundColor: activeView === 2 ? Colors.light.secondary : Colors.light.text, padding: 8, borderRadius: 8 }}>
+          {/* <TouchableOpacity onPress={() => setActiveView(2)} style={{ backgroundColor: activeView === 2 ? Colors.light.secondary : Colors.light.text, padding: 8, borderRadius: 8 }}>
             <Text style={{ color: activeView === 2 ? Colors.light.text : Colors.light.secondary }}>Podcasts</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
@@ -53,6 +53,7 @@ export default function HomeScreen() {
             songlist.map((item, idx) => {
 
               if (idx > 7) return;
+              if (idx > 3 && Dimensions.get("screen").width < 800) return;
 
               return <ItemPreviewLong key={`header-${item.file}`} title={item.title} file={item.file} />
             })
@@ -69,7 +70,7 @@ export default function HomeScreen() {
           }
         </View>
 
-        <Text style={[styles.subtitle]}>Recently Played</Text>
+        {/* <Text style={[styles.subtitle]}>Recently Played</Text>
         <View style={{ display: "flex", flexDirection: "row", overflow: "scroll" }}>
           {
             [0].map(item => {
@@ -77,7 +78,7 @@ export default function HomeScreen() {
               return <ItemPreviewSmall key={`recent-${item.file}`} />
             })
           }
-        </View>
+        </View> */}
 
       </View>
 

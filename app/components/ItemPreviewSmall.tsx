@@ -2,7 +2,7 @@ import { Colors } from "@/constants/Colors";
 import { socket } from "@/scripts/socket";
 import { Entypo } from "@expo/vector-icons";
 import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface LebronSong {
     title: string
@@ -28,7 +28,7 @@ export function ItemPreviewSmall({ title, file, cover }: LebronSong) {
                 />
                 <TouchableOpacity onPress={() => {
                     socket.emit("playsong", file);
-                }} style={{ display: isHovered ? "flex" : "none", position: "absolute", right: 12, bottom: 12, backgroundColor: Colors.light.secondary, borderRadius: 20, padding: 8 }}>
+                }} style={{ display: isHovered || Dimensions.get("screen").width < 800 ? "flex" : "none", position: "absolute", right: 12, bottom: 12, backgroundColor: Colors.light.secondary, borderRadius: 20, padding: 8 }}>
                     <Entypo name="controller-play" size={24} color={Colors.light.text} />
                 </TouchableOpacity>
             </View>

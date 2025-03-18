@@ -2,7 +2,7 @@ import { Colors } from "@/constants/Colors";
 import { socket } from "@/scripts/socket";
 import { Entypo } from "@expo/vector-icons";
 import { useRef, useState } from "react";
-import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface LebronSong {
     title: string
@@ -32,7 +32,7 @@ export function ItemPreviewLong({ title, file, cover }: LebronSong) {
 
             <TouchableOpacity onPress={() => {
                 socket.emit("playsong", file);
-            }} style={{ display: isHovered ? "flex" : "none", position: "absolute", right: 12, backgroundColor: Colors.light.secondary, borderRadius: 20, padding: 8 }}>
+            }} style={{ display: isHovered || Dimensions.get("screen").width < 800 ? "flex" : "none", position: "absolute", right: 12, backgroundColor: Colors.light.secondary, borderRadius: 20, padding: 8 }}>
                 <Entypo name="controller-play" size={24} color={Colors.light.text} />
             </TouchableOpacity>
 
@@ -42,7 +42,7 @@ export function ItemPreviewLong({ title, file, cover }: LebronSong) {
 
 const styles = StyleSheet.create({
     root: {
-        width: "24%",
+        width: Dimensions.get("screen").width < 800 ? "100%" : "24%",
         display: "flex",
         flexDirection: "row",
         alignItems: "center",

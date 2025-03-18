@@ -4,7 +4,7 @@ import { concatenateArrayBuffers, formatSongTime } from "@/scripts/utils";
 import { Entypo } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 
 interface LebronifyPlayer {
@@ -26,14 +26,14 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
 
     useEffect(() => {
         if (playing) {
-            audioRef.current.pause();
-        } else {
             audioRef.current.play();
+        } else {
+            audioRef.current.pause();
         }
     }, [playing])
 
     useEffect(() => {
-        setPlaying(true);
+        if (musicinfo) setPlaying(true);
     }, [musicinfo])
 
     useEffect(() => {
@@ -46,6 +46,8 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
             setRuntime(runtime);
             setDuration(duration);
             setSliderTime(runtime / duration);
+
+            if (runtime === duration) setPlaying(false)
 
         }, 1000);
         return () => {
@@ -77,11 +79,15 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
 
     return (
 
-        <View style={[styles.player]}>
+        <View style={[styles.player, { flexDirection: Dimensions.get("screen").width < 800 ? "column" : "row" }]}>
             <View style={[styles.playercurrent]}>
                 <Image
                     source={require('@/assets/images/cover.png')}
-                    style={styles.playercover}
+                    style={[styles.playercover, {
+                        height: Dimensions.get("screen").width < 800 ? 50 : 75,
+                        width: Dimensions.get("screen").width < 800 ? 50 : 75
+
+                    }]}
                 />
                 <View>
                     <Text style={[styles.playertitle]}>{musicinfo ? musicinfo.title : "LeBronify"}</Text>
@@ -94,6 +100,7 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
                     <TouchableOpacity onPress={() => {
                         audioRef.current.currentTime = 0;
                         audioRef.current.play();
+                        setPlaying(true);
                     }} style={{ padding: 8 }}>
                         <Entypo name="controller-jump-to-start" size={24} color="white" />
                     </TouchableOpacity>
@@ -102,9 +109,9 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
                     }} style={{ backgroundColor: "#333", borderRadius: 20, padding: 8 }}>
                         {
                             playing ? (
-                                <Entypo name="controller-play" size={24} color={Colors.light.text} />
+                                <Entypo name="controller-paus" size={24} color={Colors.light.text} />
                             ) : (
-                                <Entypo name="controller-paus" size={24} color={Colors.light.secondary} />
+                                <Entypo name="controller-play" size={24} color={Colors.light.secondary} />
                             )
                         }
 
@@ -116,7 +123,7 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
                 <View style={{ flexDirection: "row", gap: 8 }}>
                     <Text style={{ color: "white" }}>{formatSongTime(runtime)}</Text>
                     <Slider
-                        style={{ width: 300 }}
+                        style={{ width: 250 }}
                         value={sliderTime}
                         minimumValue={0}
                         maximumValue={1}
@@ -125,15 +132,16 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
                         thumbTintColor={Colors.light.text}
                         onValueChange={(val) => {
                             const timestamp = audioRef.current.duration * val;
-                            console.log(timestamp)
                             audioRef.current.currentTime = timestamp;
                             audioRef.current.play();
+                            setPlaying(true);
                         }}
                     />
                     <Text style={{ color: "white" }}>{formatSongTime(duration)}</Text>
                 </View>
             </View>
-            <View style={[styles.playeraudio]}>
+            <View style={[styles.playeraudio, { display: Dimensions.get("screen").width < 800 ? "none" : "flex" }]}>
+                <Entypo name="beamed-note" size={24} color="white" />
                 <Slider
                     style={{ width: 150 }}
                     value={1}
@@ -154,7 +162,8 @@ const styles = StyleSheet.create({
     player: {
         padding: 16,
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        alignItems: "center"
     },
     playercurrent: {
         flexDirection: "row",
@@ -178,6 +187,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         gap: 8,
+        width: "50%"
     },
     playerbuttons: {
         width: 300,
@@ -187,7 +197,8 @@ const styles = StyleSheet.create({
         gap: 8
     },
     playeraudio: {
-        justifyContent: "center"
-
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8
     },
 });

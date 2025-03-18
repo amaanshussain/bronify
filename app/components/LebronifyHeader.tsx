@@ -1,29 +1,63 @@
 import { Colors } from "@/constants/Colors";
+import { socket } from "@/scripts/socket";
 import { Entypo } from "@expo/vector-icons";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
-export default function LebronifyHeader() {
+export default function LebronifyHeader({ songlist }) {
 
-    return (
-        <View style={[styles.header]}>
-            <TouchableOpacity onPress={() => {
-                
-            }}>
-                <Image
-                    source={require('@/assets/images/lebronifylogo.png')}
-                    style={styles.logo}
-                />
-            </TouchableOpacity>
-            <View style={[styles.headermiddle]}>
-                <Entypo name="magnifying-glass" size={24} color={Colors.light.text} />
-                <TextInput style={[styles.textinput]} placeholder='What do you want to play?' placeholderTextColor="#766912" />
-            </View>
-            <View>
-                <Text style={[styles.caption]}>For the king.</Text>
-            </View>
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  useEffect(() => {
+    const temp = songlist.filter(item =>
+      item.title && item.title.toLowerCase().includes(query.toLowerCase())
+    );
+    console.log(results)
+    setResults(temp)
+  }, [query])
+
+  return (
+    <View style={[styles.header]}>
+      <TouchableOpacity style={[{ display: Dimensions.get("screen").width < 800 ? "none" : "flex" }]} onPress={() => {
+
+      }}>
+        <Image
+          source={require('@/assets/images/lebronifylogo.png')}
+          style={styles.logo}
+        />
+      </TouchableOpacity>
+      <View style={[styles.headermiddle]}>
+        <Entypo name="magnifying-glass" size={24} color={Colors.light.text} />
+        <TextInput style={[styles.textinput]} value={query} onChangeText={(text) => setQuery(text)} placeholder='What do you want to play?' placeholderTextColor="#766912" />
+        <View style={[styles.searchbox, { display: query !== "" ? "flex" : "none" }]}>
+          {
+            results.map(song => {
+
+              return (
+                <View style={[styles.queryresult]}>
+                  <Image
+                    source={require('@/assets/images/cover.png')}
+                    style={styles.searchcover}
+                  />
+                  <Text style={[styles.searchtitle]}>{song.title}</Text>
+                  <TouchableOpacity onPress={() => {
+                    socket.emit("playsong", song.file);
+                    setQuery("");
+                  }} style={{ backgroundColor: Colors.light.secondary, borderRadius: 20, padding: 8, }}>
+                    <Entypo name="controller-play" size={24} color={Colors.light.text} />
+                  </TouchableOpacity>
+                </View>
+              )
+            })
+          }
         </View>
-    )
+      </View>
+      <View>
+        <Text style={[styles.caption, { display: Dimensions.get("screen").width < 800 ? "none" : "flex" }]}>For the king.</Text>
+      </View>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -33,18 +67,28 @@ const styles = StyleSheet.create({
     padding: 16,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
+    justifyContent: Dimensions.get("screen").width < 800 ? "center" : "space-between",
+    alignItems: "center",
+    zIndex: 5
   },
   headermiddle: {
-    width: "25%",
+    width: Dimensions.get("screen").width < 800 ? "75%" : "25%",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#222",
     borderRadius: 32,
     padding: 16,
-    gap: 16
+    gap: 16,
+    position: "relative"
+  },
+  searchbox: {
+    position: "absolute",
+    top: "100%",
+    backgroundColor: "#222",
+    width: "100%",
+    padding: 8,
   },
   textinput: {
     color: Colors.light.text,
@@ -59,4 +103,17 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     fontWeight: "500"
   },
+  queryresult: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8
+  },
+  searchcover: {
+    height: 50,
+    width: 50,
+  },
+  searchtitle: {
+    color: Colors.light.text
+  }
 })

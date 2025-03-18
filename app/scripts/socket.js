@@ -1,5 +1,4 @@
 import { io } from 'socket.io-client';
-import { Buffer } from 'buffer';
 
 const URL = 'http://localhost:3000';
 
