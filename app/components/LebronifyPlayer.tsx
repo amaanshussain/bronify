@@ -116,7 +116,7 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
                 <View style={{ flexDirection: "row", gap: 8 }}>
                     <Text style={{ color: "white" }}>{formatSongTime(runtime)}</Text>
                     <Slider
-                        style={{ width: "80%" }}
+                        style={{ width: 300 }}
                         value={sliderTime}
                         minimumValue={0}
                         maximumValue={1}
@@ -178,7 +178,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         gap: 8,
-        width: "50%"
     },
     playerbuttons: {
         width: 300,
