@@ -1,6 +1,6 @@
 
 
-const BASEURL = "http://127.0.0.1:3000"
+const BASEURL = "https://lebronify.develoop.app"
 
 export async function GetLebronSongList() {
     const requestOptions = {
