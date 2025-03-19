@@ -23,7 +23,7 @@ export function ItemPreviewSmall({ title, file, cover }: LebronSong) {
             <View>
 
                 <Image
-                    source={require('@/assets/images/cover.jpg')}
+                    source={require('@/assets/images/lebroncover.jpg')}
                     style={styles.previewcover}
                 />
                 <TouchableOpacity onPress={() => {

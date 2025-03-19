@@ -37,7 +37,7 @@ export default function LebronifyHeader({ songlist }) {
               return (
                 <View style={[styles.queryresult]}>
                   <Image
-                    source={require('@/assets/images/cover.jpg')}
+                    source={require('@/assets/images/lebroncover.jpg')}
                     style={styles.searchcover}
                   />
                   <Text style={[styles.searchtitle]}>{song.title}</Text>
