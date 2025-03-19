@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
         );
         socket.emit("musicinfo", songinfo);
 
-        sendBufferInChunks(socket, "musicdata", buf, CHUNKSIZE);
+        sendBufferInChunks(socket, "musicdata", wav, CHUNKSIZE);
 
     })
 });
