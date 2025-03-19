@@ -11,8 +11,6 @@ import { GetLebronSongList } from '@/scripts/lebronjapi'
 
 export default function HomeScreen() {
 
-  const audioRef = useRef(new Audio());
-
   const [activeView, setActiveView] = useState(0);
   useEffect(() => {
     console.log(activeView);
@@ -82,7 +80,7 @@ export default function HomeScreen() {
 
       </View>
 
-      <LebronifyPlayer audioRef={audioRef} />
+      <LebronifyPlayer />
 
     </View>
   );

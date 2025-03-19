@@ -3,7 +3,7 @@ import { socket } from "@/scripts/socket";
 import { concatenateArrayBuffers, formatSongTime } from "@/scripts/utils";
 import { Entypo } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 
@@ -11,7 +11,9 @@ interface LebronifyPlayer {
     audioRef: React.MutableRefObject<HTMLAudioElement>
 }
 
-export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
+export default function LebronifyPlayer() {
+
+    const audioRef = useRef(new Audio());
 
     const [volume, setVolume] = useState(1);
     const [runtime, setRuntime] = useState(-1);
@@ -56,25 +58,31 @@ export default function LebronifyPlayer({ audioRef }: LebronifyPlayer) {
     }, []);
 
 
-    socket.on("musicinfo", (data) => {
-        setMusicInfo(data);
-    })
+    useEffect(() => {
+        socket.on("musicinfo", (data) => {
+            setMusicInfo(data);
+        })
+    }, [])
 
+    useEffect(() => {
 
-    const receivedChunks: ArrayBuffer[] = [];
-    socket.on("musicdata", (data) => {
-        receivedChunks[data.index] = data.data;
-        if (receivedChunks.filter(Boolean).length === data.totalChunks) {
-            const bufs = receivedChunks[0];
-            const music = concatenateArrayBuffers(bufs)
+        let receivedChunks: ArrayBuffer[] = [];
+        socket.on("musicdata", (data) => {
 
-            const bufferData = new Uint8Array(music);
-            const blob = new Blob([bufferData], { type: "audio/wav" });
-            const objectURL = URL.createObjectURL(blob);
-            audioRef.current.src = objectURL;
-            audioRef.current.play();
-        }
-    });
+            if (receivedChunks.length !== data.totalChunks) receivedChunks[data.index] = data.data;
+
+            if (receivedChunks.filter(Boolean).length === data.totalChunks) {
+                const music = concatenateArrayBuffers(receivedChunks)
+
+                const bufferData = new Uint8Array(music);
+                const blob = new Blob([bufferData], { type: "audio/wav" });
+                const objectURL = URL.createObjectURL(blob);
+                audioRef.current.src = objectURL;
+                audioRef.current.play();
+                receivedChunks = [];
+            }
+        });
+    }, [])
 
 
     return (
