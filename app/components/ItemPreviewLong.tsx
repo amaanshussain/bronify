@@ -23,7 +23,7 @@ export function ItemPreviewLong({ title, file, cover }: LebronSong) {
             >
 
             <Image
-                source={require('@/assets/images/cover.png')}
+                source={require('@/assets/images/cover.jpg')}
                 style={styles.previewcover}
             />
             <View style={{ paddingHorizontal: 16 }}>

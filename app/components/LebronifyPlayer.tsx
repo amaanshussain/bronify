@@ -90,7 +90,7 @@ export default function LebronifyPlayer() {
         <View style={[styles.player, { flexDirection: Dimensions.get("screen").width < 800 ? "column" : "row" }]}>
             <View style={[styles.playercurrent]}>
                 <Image
-                    source={require('@/assets/images/cover.png')}
+                    source={require('@/assets/images/cover.jpg')}
                     style={[styles.playercover, {
                         height: Dimensions.get("screen").width < 800 ? 50 : 75,
                         width: Dimensions.get("screen").width < 800 ? 50 : 75
