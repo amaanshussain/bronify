@@ -48,7 +48,7 @@ app.get("/songs", (req, res) => {
 app.post("/upload", async (req, res) => {
 
     const title = req.body.title;
-    const filename = req.body.title.toLowerCase().replace("/ /g", "_");
+    const filename = req.body.title.toLowerCase().replaceAll(" ", "_");
     const url = req.body.url;
 
     const key = req.body.key;
