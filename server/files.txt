@@ -17,3 +17,4 @@ A Thousand Brons:athousandbrons.mp3:
 California Bron:californiabron.mp3:
 My Lebron:mybron.mp3:
 Brontastic:brontastic.mp3:
+LeBeauty and a Beat:lebeauty_and_a_beat.mp3:
