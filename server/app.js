@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const http = require('http');
 const { Server } = require('socket.io');
 const fs = require('fs')
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 require('dotenv').config();
 
