@@ -1,11 +1,16 @@
 const express = require('express');
-const cors = require('cors')
+const cors = require('cors');
+const bodyParser = require('body-parser')
 const http = require('http');
 const { Server } = require('socket.io');
 const fs = require('fs')
 
+require('dotenv').config();
+
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
+
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
     cors: {
@@ -22,112 +27,79 @@ app.get("/", (req, res) => {
     res.send("Server is running.");
 });
 
-const SONGMAPPING = [
-    {
-        title: "Lebron James RnB",
-        file: "lebronjames.wav",
-        cover: ""
-    },
-    {
-        title: "Lebron that I used to know",
-        file: "lebronthatiusedtoknow.mp3",
-        cover: ""
-    },
-    {
-        title: "Thinking about Lebron",
-        file: "thinkingaboutlebron.mp3",
-        cover: ""
-    },
-    {
-        title: "",
-        file: "towardsthebron.mp3",
-        cover: ""
-    },
-    {
-        title: "Lebrons Rooms",
-        file: "lebronsroom.mp3",
-        cover: ""
-    },
-    {
-        title: "Slow Dancing with Lebron",
-        file: "slowdancingwithlebron.mp3",
-        cover: ""
-    },
-    {
-        title: "Die with Lebron",
-        file: "diewithlebron.mp3",
-        cover: ""
-    },
-    {
-        title: "Lebrons Hour",
-        file: "lebronshour.mp3",
-        cover: ""
-    },
-    {
-        title: "Lenade",
-        file: "lenade.mp3",
-        cover: ""
-    },
-    // {
-    //     title: "Heartbreak Broniversary",
-    //     file: "heartbreakbroniversary.mp3",
-    //     cover: ""
-    // },
-    {
-        title: "Am I Lebron",
-        file: "amilebron.mp3",
-        cover: ""
-    },
-    {
-        title: "Lebron Fashion",
-        file: "lebronfashion.mp3",
-        cover: ""
-    },
-    {
-        title: "Hey There Bronny",
-        file: "heytherebronny.mp3",
-        cover: ""
-    },
-    {
-        title: "The Perfect Bron",
-        file: "theperfectbron.mp3",
-        cover: ""
-    },
-    {
-        title: "Lebron Matter",
-        file: "lebronmatter.mp3",
-        cover: ""
-    },
-    {
-        title: "Promiscuobron",
-        file: "promiscuobron.mp3",
-        cover: ""
-    },
-    {
-        title: "A Thousand Brons",
-        file: "athousandbrons.mp3",
-        cover: ""
-    },
-    {
-        title: "California Bron",
-        file: "californiabron.mp3",
-        cover: ""
-    },
-    {
-        title: "My Lebron",
-        file: "mybron.mp3",
-        cover: ""
-    },
-]
-
 app.get("/songs", (req, res) => {
 
-    const newArray = SONGMAPPING.map(obj => ({...obj}));
-    newArray.reverse();
+    const file = fs.readFileSync("files.txt");
+    const data = file.toString()
 
-    res.send({ songs: newArray })
+    const mapping = [];
+    data.split("\n").map(songdata => {
+        if (songdata === "") return;
+        mapping.push({
+            title: songdata.split(":")[0],
+            file: songdata.split(":")[1],
+            cover: songdata.split(":")[2]
+        })
+    })
+
+    res.send({ songs: mapping.reverse() })
 })
 
+app.post("/upload", async (req, res) => {
+
+    const title = req.body.title;
+    const filename = req.body.title.toLowerCase().replace("/ /g", "_");
+    const url = req.body.url;
+
+    const key = req.body.key;
+    if (process.env.UPLOAD_KEY !== key) {
+        res.send({ error: "Invalid upload key." });
+        return;
+    }
+
+    const songsFile = fs.readFileSync("files.txt");
+    const songsData = songsFile.toString();
+    if (songsData.includes(filename)) {
+        res.send({ error: "File name already exists" });
+        return;
+    }
+
+    try {
+        const response = await fetch("https://snap-video3.p.rapidapi.com/download", {
+            method: 'POST',
+            headers: {
+                'x-rapidapi-key': process.env.RAPID_API_KEY,
+                'x-rapidapi-host': 'snap-video3.p.rapidapi.com',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                url: url
+            })
+        });
+        const result = await response.json();
+
+        for (let i = 0; i < result.medias.length; i++) {
+            const mediaType = result.medias[i];
+            if (mediaType.extension !== "mp3") {
+                continue;
+            }
+
+            const downloadUrl = mediaType.url;
+            const response = await fetch(downloadUrl);
+            const buffer = await response.arrayBuffer();
+            fs.writeFileSync(`audio/${filename}.mp3`, Buffer.from(buffer));
+
+            let data = songsFile.toString();
+            data += `${title}:${filename}.mp3:\n`
+            fs.writeFileSync("files.txt", data)
+        }
+
+        res.send({ response: "Song added." });
+    } catch (error) {
+        res.send({ error });
+    }
+
+})
 
 function chunkBuffer(buffer, chunkSize) {
     const chunks = [];
@@ -149,9 +121,21 @@ io.on('connection', (socket) => {
 
         const CHUNKSIZE = 8192
         const wav = fs.readFileSync(`audio/${data[0]}`);
-        const buf = chunkBuffer(wav, CHUNKSIZE);
 
-        const songinfo = SONGMAPPING.find(obj =>
+        const file = fs.readFileSync("files.txt");
+        const songData = file.toString()
+
+        const mapping = [];
+        songData.split("\n").map(songdata => {
+            if (songdata === "") return;
+            mapping.push({
+                title: songdata.split(":")[0],
+                file: songdata.split(":")[1],
+                cover: songdata.split(":")[2]
+            })
+        })
+
+        const songinfo = mapping.find(obj =>
             obj.file && obj.file.includes(data[0])
         );
         socket.emit("musicinfo", songinfo);
